@@ -111,6 +111,8 @@ MonoBehaviour:
   isBusy: 0
   childAmount: 0
   c: 0
+  startDontCollectCoolDown: 3
+  isCoolingDown: 0
 --- !u!1001 &6032968642333019
 PrefabInstance:
   m_ObjectHideFlags: 0

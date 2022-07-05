@@ -13,8 +13,11 @@ public class DropSpot : MonoBehaviour
     {
         if(other.gameObject.CompareTag("Player"))
         {
-            if(!stack.isBusy)
-            stack.isGoingToBarn = true;
+            if (!stack.isBusy)
+            {
+                stack.isGoingToBarn = true;
+                stack.isCoolingDown = true;
+            }
         }
     }
 

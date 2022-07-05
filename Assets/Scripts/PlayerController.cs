@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
@@ -14,17 +15,18 @@ public class PlayerController : MonoBehaviour
     private Animator anim;
     private PlayerInput playerInput;
     [SerializeField] float rotationSpeed;
-    Vector2 input;
-    public Vector3 move;
+    Vector2 input, inputKeyboard;
+    public Vector3 move, moveKeyboard;
     private string SPEED = "speed";
     private string ISHARVESTING = "isHarvesting";
     public bool isTouchingWheat;
-
+    bool isRemoteConnected;
     private void Start()
     {
         controller = GetComponent<CharacterController>();
         anim = GetComponent<Animator>();
         playerInput = GetComponent<PlayerInput>();
+        
     }
 
     void Update()
@@ -37,17 +39,52 @@ public class PlayerController : MonoBehaviour
         }
 
         input = playerInput.actions["Move"].ReadValue<Vector2>();
+        inputKeyboard = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         move = new Vector3(input.x, 0, input.y);
-        if (input != Vector2.zero)
+        moveKeyboard = new Vector3(inputKeyboard.x, 0, inputKeyboard.y);
+#if UNITY_EDITOR
+        if (EditorApplication.isRemoteConnected)
+            isRemoteConnected = true;
+#endif
+
+        if (input != Vector2.zero && Application.platform == RuntimePlatform.Android || isRemoteConnected)// EditorApplication.isRemoteConnected)
         {
+
             controller.Move(move * Time.deltaTime * playerSpeed);
             Quaternion toRotation = Quaternion.LookRotation(move, Vector3.up);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
         }
+
+
+        if (inputKeyboard != Vector2.zero && Application.platform == RuntimePlatform.WindowsEditor && !isRemoteConnected)
+        {
+
+            controller.Move(moveKeyboard.normalized * Time.deltaTime * playerSpeed);
+            Quaternion toRotation = Quaternion.LookRotation(moveKeyboard, Vector3.up);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
+        }
+        
     }
     void SetAnimationValues()
     {
-        anim.SetFloat(SPEED, move.magnitude);
+
+        //if(input > 0)
+        // if(move.magnitude >= 0.1f)
+        if (Application.platform == RuntimePlatform.Android || isRemoteConnected)
+        {
+            anim.SetFloat(SPEED, move.magnitude);
+            print("anroid");
+        }
+
+        if (Application.platform == RuntimePlatform.WindowsEditor && !isRemoteConnected)
+        {
+            anim.SetFloat(SPEED, moveKeyboard.magnitude);
+            print("windows");
+        }
+
+        //if(inputKeyboard.magnitude != 0)
+        // if (inputKeyboard.magnitude >= 0.1f)
+        //anim.SetFloat(SPEED, inputKeyboard.magnitude);
         anim.SetBool(ISHARVESTING, isHarvesting);
         if (!anim.GetBool(ISHARVESTING))
             isTouchingWheat = false;

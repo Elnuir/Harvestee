@@ -23,12 +23,17 @@ public class Stack : MonoBehaviour
     int a = 1;
     int b;
     public int c;
+
+    [SerializeField] float startDontCollectCoolDown;
+    float dontCollectCoolDown;
+    public bool isCoolingDown;
     //TempStack tempStack;
     void Start()
     {
         playerController = GetComponentInParent<PlayerController>();
         barn = FindObjectOfType<DropSpot>().transform;
         delta = startDelta;
+        dontCollectCoolDown = startDontCollectCoolDown;
         // tempStack = FindObjectOfType<TempStack>();
         animator = GetComponent<Animator>();
         hayBalesTransforms.AddRange(GetComponentsInChildren<Transform>());
@@ -94,8 +99,9 @@ public class Stack : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        CoolDownCheck();
         AnimSetter();
-
+        
         SellEverithing();
     }
 
@@ -108,7 +114,6 @@ public class Stack : MonoBehaviour
             isBusy = false;
             isFull = false;
             animator.enabled = true;
-            print("YOu can collect now");
         }
     }
 
@@ -116,5 +121,17 @@ public class Stack : MonoBehaviour
     {
         characterSpeed = playerController.move.magnitude;
         animator.SetFloat(PLAYERSPEED, characterSpeed);
+    }
+    void CoolDownCheck()
+    {
+        if(isCoolingDown)
+        {
+            dontCollectCoolDown -= Time.deltaTime;
+            if(dontCollectCoolDown <= 0)
+            {
+                dontCollectCoolDown = startDontCollectCoolDown;
+                isCoolingDown = false;
+            }
+        }
     }
 }

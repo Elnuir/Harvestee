@@ -20,7 +20,7 @@ public class HayBaleCollectTrigger : MonoBehaviour
         if (other.gameObject.TryGetComponent<PlayerController>(out PlayerController a))
         {
             // isCollected = true;
-            if (!stack.isBusy)
+            if (!stack.isBusy && !stack.isGoingToBarn &&!stack.isFull && !stack.isCoolingDown)
             {
                 stack.GetABlock();
 
